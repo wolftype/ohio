@@ -24,9 +24,18 @@
 #include <iostream>
 #include <boost/hana/transform.hpp>
 #include <boost/hana/tuple.hpp>
+#include <experimental/optional>
+
+#include "time.hpp"
+#include "macros.hpp"
+
 
 namespace hana = boost::hana;
 namespace ohio {
+
+template<class T>
+using maybe = std::experimental::optional<T>;
+
 
 auto print_ = [](auto&& xs){
   std::cout << "printing: " << xs << std::endl;
@@ -43,6 +52,11 @@ auto zero_ = [](auto&& ... xs){
 
 auto do_ = [](auto&& f){
   return f();
+};
+
+/// send time through process f
+auto proc_ = [](auto&& f){
+  return f( time_() );
 };
 
 /*-----------------------------------------------------------------------------
@@ -91,6 +105,10 @@ auto divide_by_ = [](auto&& x){
   return [=](auto&& y){ return y/x; };
 };
 
+/// Signal subtract from (<X>) takes a Y and subtracts it from X
+auto subtract_from_ = [](auto&& X){
+  return [=](auto&& y){ return X-y; };
+};
 
 /*-----------------------------------------------------------------------------
  *  /// binary operations (use with merge_ to combine two streams)

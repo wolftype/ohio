@@ -48,7 +48,7 @@ auto microseconds = []( auto duration ){
 };
 
 /// Return Time Since App Start in milliseconds
-auto time_ = [](){ return milliseconds( now() - AppStartTime ); };
+auto time_ = []() -> int { return milliseconds( now() - AppStartTime ); };
 
 
 /*-----------------------------------------------------------------------------

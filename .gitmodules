@@ -1,0 +1,3 @@
+[submodule "ext/hana"]
+	path = ext/hana
+	url = https://github.com/boostorg/hana

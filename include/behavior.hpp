@@ -30,25 +30,46 @@ namespace ohio{
 //  @todo template<class F> could provide user defined callbacks
  struct behavior{
    
+  // behavior(int x){}
+   
   // F f;
+   ~behavior(){
+      stop();
+      //handle shared future and ptr ?
+   }
 
    template<class ... e>
-   void launch( e&& ... es )  {
+   behavior& launch(e&& ... es )  {
      stop();                               // stops behavior if it is already running
-     auto tmp = callback3_( do_, bStop );  
+     bDone = false;
+     auto tmp = callback3_( proc_, bStop, pollrateLaunch );  
      mReturn = tmp( std::forward< typename std::decay< decltype(es)>::type >(es)...);
      bStarted = true;
+     return *this;
    }
 
    void stop(){
      //@todo check that mReturn is valid, i.e. has been launched
      if (bStarted) interrupt_( bStop, mReturn )();
+     bDone = true;
+   }
+
+   /// Execute behavior until ev returns true
+   template<class T>
+   behavior& until(T&& ev){
+      auto tmp = once_(pollrateFinish, ev); 
+      thread_([tmp,this](){ tmp.get(); this->stop(); })();
+      return *this;
    }
 
    int mId;
-   bool bStarted = false; //set to true after first launch
+   bool bStarted = false;  //set to true after first launch
+   bool bDone = false; //set to true after stop() is called
    std::shared_ptr<bool> bStop = std::make_shared<bool>(false);
    std::shared_future<bool> mReturn;
+    
+   float pollrateLaunch = .001;  // default rate of polling for launching thread
+   float pollrateFinish = .001;  // default rate of polling for thread checking finish condition
 
  };
 

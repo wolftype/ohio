@@ -20,36 +20,61 @@
 
 using namespace ohio;
 
-
-  ///detects that input has stopped incrementing (use with mod_)
-  auto has_reset_ = [](){
+  auto when2_ = [](auto&& e, auto&& func){
+  
+    auto ce = e(0);
+    using T = decltype( func( MVAL( ce ) ) );
+    auto my = maybe<T>();
+    auto mn = maybe<T>();
     
-    int start = 0;
-    return[=](auto&& t) mutable {
-      if ( t > start ) {
-        start = t;
-        return false;
-      } else {
-        start = 0;
+    return [=](int&& xs) mutable -> maybe<T>& {
+      auto& te = FORWARD(e)( FORWARD(xs) );
+      if (te) {
+        my = maybe<T>( FORWARD(func)(*te) );
+        return my;
       }
-
-      return true;
-
+      return mn;
     };
   };
 
 
+/// send time through process f
+auto proc2_ = [](auto&& f){
+  using F = typename std::decay<decltype(f)>::type;
+  return std::forward<F>(f)( time_() );
+};
+
+
+auto test_ = [](auto&& v){
+  int x = v;
+  return [=](auto&& ... t) mutable{
+     x+=1;
+     cout << x << endl;
+    return x;
+  };
+};
+
+
 int main(){
 
-
-  auto tsig = hana::compose( detect_reset_(), mod_(1000 * .5) );
-
- // auto tmod =  mod_(1000.0/x);
-  auto sig = impulse_(.5);
+  AppStartTime = now();  
   
+  auto go_func_ = [](auto&& t){
+    cout << t << endl;
+    return true;
+  };
+
+  auto sigfun = map_(5, go_func_);
+
+  auto e = every_(.5, test_(2) );
+
+  auto w = when2_(e, proc2_);
+
+ // behavior b;
+ // b.launch( e );
+
   while ( wait_(.001)() ){
-      
-    cout << tsig( time_()) << endl;
+   auto& x =  w( time_() );
   }
 
   return 0;

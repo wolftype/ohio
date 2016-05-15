@@ -27,5 +27,6 @@
 #include "signal.hpp"
 #include "thread.hpp"
 #include "behavior.hpp"
+#include "macros.hpp"
 
 #endif   /* ----- #ifndef ohio_INC  ----- */

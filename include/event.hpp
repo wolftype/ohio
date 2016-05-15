@@ -3,7 +3,7 @@
 
 #include <atomic>
 #include <sstream>
-#include <experimental/optional>
+
 #include "arrows.hpp"
 #include "thread.hpp"
 #include "time.hpp"
@@ -23,8 +23,14 @@ namespace ohio{
   };
 
 
-  template<class T>
-  using maybe = std::experimental::optional<T>;
+//  auto event_ =[]( auto&& f){
+//    using T = typename std::decay< decltype(f) >::type;
+//    
+//    return [=](auto&& ... xs){
+//      
+//    }
+//  };
+//
   /*-----------------------------------------------------------------------------
    *  SWITCHING (See YAMPA)
    *-----------------------------------------------------------------------------*/
@@ -54,17 +60,26 @@ namespace ohio{
   };
 
   /// tag event e with value b
-  auto tag_ = [](auto&& e, auto&& b) {
+  auto tagbase_ = [](auto&& e, auto&& b) {
     using T = typename std::decay< decltype(b) >::type;
     if (e) return maybe<T>( std::forward<T>(b) );
     else return maybe<T>();
   };
 
-  auto tagstream_ = [](auto&& es, auto&& b){
+  auto tag_ = [](auto&& es, auto&& b){
     return [=](auto&& ...xs )  mutable { //why do we need mutable here?
-      return tag_( es( std::forward< typename std::decay< decltype(xs) >::type>(xs)...), b );
+      return tagbase_( es( std::forward< typename std::decay< decltype(xs) >::type>(xs)...), b );
     };
   };
+
+  auto tag2_ = [](auto&& es, auto&& b){
+    auto m = maybe<TYPE(b)>(); 
+    return [=](auto&& ...xs )  mutable -> maybe<TYPE(b)>& { 
+      m = tagbase_( es( std::forward< typename std::decay< decltype(xs) >::type>(xs)...), b );
+      return m;
+    };
+  };
+
 
   /*-----------------------------------------------------------------------------
    *  Events triggers
@@ -244,22 +259,40 @@ namespace ohio{
 //  };
 
   /// timed event, counts down in millisecond clock then triggers an event of type e
-  auto every_ = [](auto&& sec, auto&& e){
+  auto every3_ = [](auto&& sec, auto&& e){
     using T = typename std::decay< decltype(e) >::type;
     using S = typename std::decay< decltype(sec)>::type;
-    auto te = e;
+   // auto te = e;
     auto imp = impulse_( 1.0/sec );
-    return[=](auto&& t) mutable {
-     // auto tmp = t / (sec*1000);
-      if ( imp(t) ){ //fabs( tmp-(floor(tmp)) ) < .00001 ) {
-        return maybe<T>( std::forward<T>(te) );
+    auto my = maybe<T>( std::forward<T>(e) ); //declared here and returned reference
+    auto mn = maybe<T>();
+    return[=](auto&& t) mutable -> maybe<T>& {
+      if ( imp(t) ){ 
+        return my; //maybe<T>( std::forward<T>(e) );
       }
       else {
-        return maybe<T>();
+        return mn;//maybe<T>();
       }
     };
   };
 
+  /// timed event, counts down in millisecond clock then triggers an event of type e
+  auto every_ = [](auto&& sec, auto&& e){
+    using T = typename std::decay< decltype(e) >::type;
+    using S = typename std::decay< decltype(sec)>::type;
+    auto imp = impulse_( 1.0/sec );
+    auto my = maybe<T>( e ); //declared here and returned reference
+    auto mn = maybe<T>();
+    return[=](int&& t) mutable -> maybe<T>& {
+      using F = typename std::decay<decltype(t)>::type;
+      if ( imp( std::forward< F >(t)) ){ 
+        return my; //maybe<T>( std::forward<T>(e) );
+      }
+      else {
+        return mn;//maybe<T>();
+      }
+    };
+  };
 
   /// timed event, counts down in millisecond clock then triggers an event of type e
   auto every2_ = [](auto&& sec, auto&& e){
@@ -312,6 +345,19 @@ namespace ohio{
       return maybe<T>();  
     };
   };
+
+  /// will generate one event e2 when another e1 happens
+//  auto on_ = [](auto&& e1, auto&& e2){
+//    using T = typename std::decay< decltype(e) >::type;
+//    return [=](auto&& t) mutable {
+//      if ( !bSet && ( (sec*1000) - t ) <= 0 ) {
+//        bSet = true;
+//        return maybe<T>(e);
+//      }
+//      return maybe<T>();  
+//    };
+//  };
+
   
   /// applies func to event stream if event has happened
   /// @returns maybe<T> where T is func(*(e(xs...))) 
@@ -324,6 +370,26 @@ namespace ohio{
       return maybe<T>();
     };
   };
+
+  /// using reference of maybe...
+  auto when2_ = [](auto&& e, auto&& func){
+  
+    auto ce = e(0);
+    using T = decltype( func( MVAL( ce ) ) );
+    auto my = maybe<T>();
+    auto mn = maybe<T>();
+    
+    return [=](int&& xs) mutable -> maybe<T>& {
+      auto& te = FORWARD(e)( FORWARD(xs) );
+      if (te) {
+        my = maybe<T>( FORWARD(func)(*te) );
+        return my;
+      }
+      return mn;
+    };
+  };
+
+  
   
   /// debug practice for spawn_ below
   auto spawn_test_ = [](auto&& func, auto&& ... e ){
@@ -388,22 +454,22 @@ namespace ohio{
   };
 
   ///spawn as a higher order function
-  auto callback3_ = [](auto&& callback, std::shared_ptr<bool>& flag){
+  auto callback3_ = [](auto&& callback, std::shared_ptr<bool>& flag, float pollrate){
     
     
     return [=,&flag](auto&& ... e) mutable {
       
-      auto sched = hana::split_( zero_, when_(e,callback)...);
+      auto sched = hana::split_( zero_, when2_(e, callback)... );  /// NOTE changed to when2_
+          //std::forward<typename std::decay<decltype(e)>::type >(e), callback)...);
 
-     // cout << "callback3" << endl;
       // return shared_future (when this returns, interrupt has been set)
       return async_( 
         [=, &flag](auto&& ... xs) mutable {     
           *flag = false;
-          while( wait_(.001)() ){ 
+          while( wait_(pollrate)() ){ 
             //interruption point... set from another thread
             if ( *flag ) {
-              cout << "interrupted" << endl;
+              cout << "callback3 interrupted" << endl;
               break;
             }
            sched( time_() ); 
@@ -427,26 +493,13 @@ namespace ohio{
   };
 
 
-  ///spawn as a higher order function
-  auto callback4_ = [](auto&& callback){
-   // fwd_shared_args( std::make_shared<bool>(false) )();
-    return [=](auto&& ... e) mutable {
-      auto sched = hana::split_( zero_, when_(e,callback)...);
-      auto bStop = std::make_shared<bool>(false);
-      thread_( [=,&bStop](auto&& ... xs) mutable { 
-        while( wait_(.001)() && (*bStop == false) ){ 
-         // cout << "inside: " << *bStop << endl;
-          sched( time_() ); } } )();
-      return std::shared_ptr<bool>( bStop);//[=](auto&& ... xs) mutable { *bStop=true; return 0; };
-    };
-  };
 
   /// launch single events
-  auto launch_ = [](auto&& e){
-
-    return thread_( [=]() mutable { 
+  auto once_ = [](float pollrate, auto&& e){
+    
+    return async_( [=]() mutable { 
             auto tmp = e(0);
-            while( wait_(.001)() && !tmp ){ 
+            while( wait_(pollrate)() && !tmp ){ 
               tmp = e( time_() ); 
             } 
             return tmp;

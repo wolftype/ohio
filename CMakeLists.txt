@@ -9,8 +9,8 @@ project(ohio)
 #INCLUDE PATHS
 include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories(${PROJECT_SOURCE_DIR}/ext)
-include_directories(${PROJECT_SOURCE_DIR}/../versor/include)
-include_directories(${PROJECT_SOURCE_DIR}/../hana/include)
+#include_directories(${PROJECT_SOURCE_DIR}/../versor/include)
+include_directories(${PROJECT_SOURCE_DIR}/ext/hana/include)
 
 #LINK PATHS
 link_directories(${PROJECT_BINARY_DIR})

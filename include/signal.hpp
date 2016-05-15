@@ -2,6 +2,7 @@
 #define OHIO_SIGNAL_INCLUDED
 
 #include <boost/hana/functional/compose.hpp>
+#include "basic.hpp"
 
 namespace hana = boost::hana;
 namespace ohio{
@@ -56,6 +57,20 @@ namespace ohio{
     };
   };
 
+  ///starts clock at 0
+  auto reset_ = [](){
+    bool bStart = false; 
+    int rTime;
+    return [=](int&& t) mutable {
+      if (!bStart){ 
+        bStart = true; rTime = t; 
+        cout << "START" << endl;
+      }
+      return t-rTime;
+    };
+  };
+
+
 
 /// Generate Oscillator from incoming Time at rate x times per second
 auto osc_ = [](float&& x){
@@ -69,12 +84,20 @@ auto impulse_ = [](float&& x){
   return hana::compose( detect_reset_(), mod_(1000.0/x) );
 };
 
-/// Generate Ramp output from incoming Time at rate x times per second
-auto ramp_ = [](float&& x){
+/// Generate Ramp UP output from incoming Time at rate x times per second
+auto ramp_ = [](auto&& x){
   ///map to value in range of [0,1)
   auto tmp = 1000.0/x;
   return hana::compose( divide_by_(tmp), mod_(tmp) );
 };
+
+/// Generate Ramp DOWN output from incoming Time at rate x times per second
+auto rampdown_ = [](auto&& x){
+  ///map to value in range of [0,1)
+  auto tmp = 1000.0/x;
+  return hana::compose( subtract_from_(1), divide_by_(tmp), mod_(tmp) );
+};
+
 
 /// Generate Sawtooth output from incoming Time at rate x times per second
 auto saw_ = [](auto&& x){
@@ -101,8 +124,58 @@ auto constant_ = [](auto&& x){
   };
 };
 
+
+///takes a func of range [0,1] and maps to time sec
+auto map_ = [](auto&& sec, auto&& func){
+  using F = typename std::decay<decltype(func)>::type;
+  return hana::compose( std::forward<F>(func), ramp_(1.f/sec), reset_() );
+};
+
+///calls func of range [1,0] 
+auto mapdown_ = [](auto&& sec, auto&& func){
+  return hana::compose(func, rampdown_(1.f/sec), reset_() );
+};
+
+
+
 /// Return Input
 auto id_ = [](auto&& x) { return x; };
+
+/// Event stream
+auto triggerval_ = [](auto&& bFlag){
+  
+  bool bSet = false;
+
+  return [=,&bFlag](auto&& ... xs) mutable {
+    if (bFlag && !bSet) {
+      bSet = true;
+      return maybe<bool>(true);
+    }
+    else if (!bFlag) {
+      bSet = false;
+    }
+      return maybe<bool>();
+  };
+  
+};
+
+/// Event stream
+auto trigger_ = [](auto&& bFunc){
+  
+  bool bSet = false;
+
+  return [=](auto&& ... xs) mutable {
+    if (bFunc() && !bSet) {
+      bSet = true;
+      return maybe<bool>(true);
+    }
+    else if (!bFunc()) {
+      bSet = false;
+    }
+      return maybe<bool>();
+  };
+  
+};
 
 
 } //ohio::
