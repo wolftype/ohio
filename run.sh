@@ -32,5 +32,5 @@ if [ $RUN_CMAKE = 1 ]; then
   cmake ..
 fi
 
-make $TARGET
+make VERBOSE=1-- $TARGET
 ./bin/$TARGET

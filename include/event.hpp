@@ -241,7 +241,7 @@ namespace ohio{
   };
 
   /// time event, counts down
-  auto after_ = [](auto&& sec, auto&& e){
+  auto after2_ = [](auto&& sec, auto&& e){
     using T = typename std::decay< decltype(e) >::type;
     auto ct = ct_(sec);
     return[=](auto&& ... xs) mutable {
@@ -249,6 +249,19 @@ namespace ohio{
       else return maybe<T>();
     };
   };
+
+  auto after_ = [](auto&& sec, auto&& e){
+    using T = typename std::decay< decltype(e) >::type;
+    auto my = maybe<T>( e );
+    auto mn = maybe<T>();
+    auto reset = reset_();
+    return[=](int&& xs) mutable -> maybe<T>& {     
+      if ( reset( std::forward<int>(xs) ) > (sec * 1000) ) {
+        return my;
+      }
+      else return mn;
+    };
+  };  
 
   /// call event e() in n seconds (via sleep)
 //  auto in_ = [](float&& sec, auto&& e){
@@ -494,7 +507,7 @@ namespace ohio{
 
 
 
-  /// launch single events
+  /// launch single events at pollrate -- once e returns something, we finish and return the contained value
   auto once_ = [](float pollrate, auto&& e){
     
     return async_( [=]() mutable { 

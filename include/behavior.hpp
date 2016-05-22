@@ -62,6 +62,13 @@ namespace ohio{
       return *this;
    }
 
+   /// Execute behavior for n seconds
+   behavior& over(float nsec){
+      auto tmp = once_(pollrateFinish, after_(nsec, true ) ); 
+      thread_([tmp,this](){ tmp.get(); this->stop(); })();
+      return *this;
+   }   
+
    int mId;
    bool bStarted = false;  //set to true after first launch
    bool bDone = false; //set to true after stop() is called

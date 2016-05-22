@@ -59,12 +59,13 @@ namespace ohio{
 
   ///starts clock at 0
   auto reset_ = [](){
+    cout << "init reset" << endl;
     bool bStart = false; 
-    int rTime;
+    int rTime = 0;
     return [=](int&& t) mutable {
       if (!bStart){ 
         bStart = true; rTime = t; 
-        cout << "START" << endl;
+        cout << "START " << t << " " << endl;
       }
       return t-rTime;
     };
@@ -126,13 +127,13 @@ auto constant_ = [](auto&& x){
 
 
 ///takes a func of range [0,1] and maps to time sec
-auto map_ = [](auto&& sec, auto&& func){
+auto over_ = [](auto&& sec, auto&& func){
   using F = typename std::decay<decltype(func)>::type;
   return hana::compose( std::forward<F>(func), ramp_(1.f/sec), reset_() );
 };
 
 ///calls func of range [1,0] 
-auto mapdown_ = [](auto&& sec, auto&& func){
+auto overdown_ = [](auto&& sec, auto&& func){
   return hana::compose(func, rampdown_(1.f/sec), reset_() );
 };
 
