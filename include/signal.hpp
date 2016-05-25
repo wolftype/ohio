@@ -60,8 +60,10 @@ namespace ohio{
   ///starts clock at 0
   auto reset_ = [](){
     cout << "init reset" << endl;
-    bool bStart = false; 
-    int rTime = 0;
+    bool bStart;
+    int rTime;
+    bStart = false; 
+    rTime = 0;
     return [=](int&& t) mutable {
       if (!bStart){ 
         bStart = true; rTime = t; 

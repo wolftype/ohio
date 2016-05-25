@@ -255,8 +255,10 @@ namespace ohio{
     auto my = maybe<T>( e );
     auto mn = maybe<T>();
     auto reset = reset_();
+    bool bDone; bDone = false;
     return[=](int&& xs) mutable -> maybe<T>& {     
-      if ( reset( std::forward<int>(xs) ) > (sec * 1000) ) {
+      if ( reset( std::forward<int>(xs) ) > (sec * 1000) && !bDone) {
+        bDone = true;
         return my;
       }
       else return mn;
@@ -349,7 +351,8 @@ namespace ohio{
   /// will generate one event e at specific time sec (relative to AppStartTime)
   auto at_ = [](auto&& sec, auto&& e){
     using T = typename std::decay< decltype(e) >::type;
-    bool bSet = false;
+    bool bSet;// = false;
+    bSet = false;
     return [=](auto&& t) mutable {
       if ( !bSet && ( (sec*1000) - t ) <= 0 ) {
         bSet = true;
