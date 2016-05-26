@@ -28,6 +28,7 @@ namespace ohio{
 
   // A Behavior has an id, boolean flag (whether to stop it), and future return value
 //  @todo template<class F> could provide user defined callbacks
+//  @todo add std::string mName member for printing out when it has been launched / interrupted
  struct behavior{
    
   // behavior(int x){}
@@ -69,7 +70,7 @@ namespace ohio{
       return *this;
    }   
 
-   int mId;
+   int mId; // id number (or make a char * or string)
    bool bStarted = false;  //set to true after first launch
    bool bDone = false; //set to true after stop() is called
    std::shared_ptr<bool> bStop = std::make_shared<bool>(false);

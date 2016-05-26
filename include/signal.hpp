@@ -131,7 +131,9 @@ auto constant_ = [](auto&& x){
 ///takes a func of range [0,1] and maps to time sec
 auto over_ = [](auto&& sec, auto&& func){
   using F = typename std::decay<decltype(func)>::type;
-  return hana::compose( std::forward<F>(func), ramp_(1.f/sec), reset_() );
+  using T = typename std::decay<decltype(reset_())>::type;
+  auto r = reset_();
+  return hana::compose( std::forward<F>(func), ramp_(1.f/sec), std::forward<T>(r) );
 };
 
 ///calls func of range [1,0] 

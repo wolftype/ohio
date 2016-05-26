@@ -240,19 +240,24 @@ namespace ohio{
     };
   };
 
-  /// time event, counts down
   auto after2_ = [](auto&& sec, auto&& e){
     using T = typename std::decay< decltype(e) >::type;
-    auto ct = ct_(sec);
-    return[=](auto&& ... xs) mutable {
-      if ( ct() ) return maybe<T>( std::forward<T>(e) );
-      else return maybe<T>();
+    auto my = maybe<T>( e );
+    auto mn = maybe<T>();
+    auto reset = reset_();
+    bool bDone; bDone = false;
+    return[=](int&& xs) mutable -> maybe<T>& {     
+      if ( reset( std::forward<int>(xs) ) > (sec * 1000) ) {
+        return my;
+      }
+      else return mn;
     };
-  };
+  };  
 
+  /// really this is "at_" function
   auto after_ = [](auto&& sec, auto&& e){
     using T = typename std::decay< decltype(e) >::type;
-    auto my = maybe<T>( e );
+    auto my = maybe<T>( std::forward<T>(e) );
     auto mn = maybe<T>();
     auto reset = reset_();
     bool bDone; bDone = false;
@@ -264,6 +269,18 @@ namespace ohio{
       else return mn;
     };
   };  
+
+  /// really this is "at_" function
+  auto after3_ = [](auto&& sec, auto&& e){
+    using T = typename std::decay< decltype(e) >::type;
+    auto reset = reset_();
+    return[=](int&& xs) mutable -> maybe<T> {     
+      if ( reset( std::forward<int>(xs) ) > (sec * 1000) ) {
+        return maybe<T>(std::forward<T>(e));
+      }
+      else return maybe<T>();
+    };
+  };    
 
   /// call event e() in n seconds (via sleep)
 //  auto in_ = [](float&& sec, auto&& e){
@@ -277,16 +294,14 @@ namespace ohio{
   auto every3_ = [](auto&& sec, auto&& e){
     using T = typename std::decay< decltype(e) >::type;
     using S = typename std::decay< decltype(sec)>::type;
-   // auto te = e;
     auto imp = impulse_( 1.0/sec );
-    auto my = maybe<T>( std::forward<T>(e) ); //declared here and returned reference
-    auto mn = maybe<T>();
-    return[=](auto&& t) mutable -> maybe<T>& {
-      if ( imp(t) ){ 
-        return my; //maybe<T>( std::forward<T>(e) );
+    return[=](auto&& t) mutable -> maybe<T> {
+      using F = typename std::decay<decltype(t)>::type;
+      if ( imp( std::forward< F >(t)) ){ 
+        return maybe<T>( std::forward<T>(e) );
       }
       else {
-        return mn;//maybe<T>();
+        return maybe<T>();
       }
     };
   };
@@ -296,7 +311,7 @@ namespace ohio{
     using T = typename std::decay< decltype(e) >::type;
     using S = typename std::decay< decltype(sec)>::type;
     auto imp = impulse_( 1.0/sec );
-    auto my = maybe<T>( e ); //declared here and returned reference
+    auto my = maybe<T>(e);//std::forward<T>(e)); //declared here and returned reference
     auto mn = maybe<T>();
     return[=](int&& t) mutable -> maybe<T>& {
       using F = typename std::decay<decltype(t)>::type;
@@ -377,7 +392,7 @@ namespace ohio{
   
   /// applies func to event stream if event has happened
   /// @returns maybe<T> where T is func(*(e(xs...))) 
-  auto when_ = [](auto&& e, auto&& func){
+  auto when1_ = [](auto&& e, auto&& func){
     return [=](auto&& ... xs) mutable {
       auto te = e( std::forward< typename std::decay< decltype(xs)>::type...>(xs)...);
       using T = decltype( func( std::declval<typename decltype(te)::value_type>() ) );
@@ -405,6 +420,43 @@ namespace ohio{
     };
   };
 
+ 
+   /// not using reference of maybe...
+  auto when_ = [](auto&& e, auto&& func){
+  
+    auto ce = e(0);
+    using T = decltype( func( MVAL( ce ) ) );
+    auto my = maybe<T>();
+    auto mn = maybe<T>();
+    
+    return [=](int&& xs) mutable -> maybe<T> {
+      auto& te = FORWARD(e)( FORWARD(xs) );
+      if (te) {
+        my = maybe<T>( FORWARD(func)(*te) );
+        return my;
+      }
+      my = maybe<T>();
+      return mn;
+    };
+  };
+ 
+   /// not using reference of maybe...
+  auto when3_ = [](auto&& e, auto&& func){
+  
+    auto ce = e(0);
+    using T = decltype( func( MVAL( ce ) ) );
+    auto my = maybe<T>();
+    auto mn = maybe<T>();
+    
+    return [=](int&& xs) mutable -> maybe<T> {
+      auto te = FORWARD(e)( FORWARD(xs) );
+      if (te) {
+        my = maybe<T>( FORWARD(func)(*te) );
+        return my;
+      }
+      return mn;
+    };
+  };
   
   
   /// debug practice for spawn_ below
@@ -459,7 +511,7 @@ namespace ohio{
     
     return [=](auto&& ... e) mutable {
       
-      auto sched = hana::split_( zero_, when_(e,callback)...);
+      auto sched = hana::split_( zero_, when1_(e,callback)...);
 
       thread_( [=](auto&& ... xs) mutable {     
         while( wait_(pollrate)() ){ 
@@ -475,7 +527,7 @@ namespace ohio{
     
     return [=,&flag](auto&& ... e) mutable {
       
-      auto sched = hana::split_( zero_, when2_(e, callback)... );  /// NOTE changed to when2_
+      auto sched = hana::split_( zero_, when_(e, callback)... );  /// NOTE changed to when3_
           //std::forward<typename std::decay<decltype(e)>::type >(e), callback)...);
 
       // return shared_future (when this returns, interrupt has been set)
