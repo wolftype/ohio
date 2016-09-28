@@ -24,7 +24,7 @@ using namespace ohio;
 /// Generate Impulse from incoming Time at rate x times per second
 auto impulse2_ = [](float&& x){
   //find modulus of incoming signal % 1000/x, check if current value is less than previous
-  return hana::compose( detect_reset_(), mod_(1000.0/x) );
+  return hana::compose( trigger_on_reset_(), mod_(1000.0/x) );
 };
 
 
@@ -57,7 +57,7 @@ int main(){
 
   auto clos = [](){
     int x = 0;
-    return [=]() mutable {
+    return [=](auto&& t) mutable {
       x = x+1;
       cout << x << endl;
       return true;
@@ -89,14 +89,14 @@ int main(){
 
   
 
-  auto tmp =  every_(.5, clos());//every3_(.5, clos() );  
+  auto tmp =  every_(.5, clos());//every3_(.5, clos() );
   auto imp = impulse2_( 1.0/.5 );
 
   while ( wait_(.001)() ){
     //(*(tmp()))();
-    auto& x = tmp( time_() ); 
+    auto x = tmp( time_() );
    // if (imp(time_())) cout << "Y" << endl;
-    if (x) (*x)();    
+   // if (x) (*x)();
   }
 
   return 0;

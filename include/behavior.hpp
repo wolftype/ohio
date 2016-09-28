@@ -26,12 +26,12 @@
 
 namespace ohio{
 
-  // A Behavior has an id, boolean flag (whether to stop it), and future return value
-//  @todo template<class F> could provide user defined callbacks
-//  @todo add std::string mName member for printing out when it has been launched / interrupted
- struct behavior{
-   
-  // behavior(int x){}
+/// A Behavior has an id, shared interrupt, and future return value, and some booleans
+///  @todo templating this class could allow for user-defined callbacks when launched
+///  @todo add std::string mName member for printing out when it has been launched / interrupted
+///  @todo how to handle shared_ptr and shared_future on destruction
+///  @todo add a `then( e )` method
+struct behavior{
    
   // F f;
    ~behavior(){
@@ -39,45 +39,50 @@ namespace ohio{
       //handle shared future and ptr ?
    }
 
+   /// launch behavior callbacks
    template<class ... e>
    behavior& launch(e&& ... es )  {
-     stop();                               // stops behavior if it is already running
+     stop();                               // stop behavior if it is already running
      bDone = false;
-     auto tmp = callback3_( proc_, bStop, pollrateLaunch );  
-     mReturn = tmp( std::forward< typename std::decay< decltype(es)>::type >(es)...);
+     auto tmp = callback_( proc_, bInterruptPtr, pollrateLaunch );
+     mReturn = tmp( FORWARD(es)...);	   // future value which will return when interrupted
+     //std::forward< typename std::decay< decltype(es)>::type >(es)...);
      bStarted = true;
      return *this;
    }
 
+   /// stop behavior
+   ///@todo check that mReturn is valid, i.e. has been launched
    void stop(){
-     //@todo check that mReturn is valid, i.e. has been launched
-     if (bStarted) interrupt_( bStop, mReturn )();
+     if (bStarted) interrupt_( bInterruptPtr, mReturn )();
      bDone = true;
    }
 
    /// Execute behavior until ev returns true
    template<class T>
    behavior& until(T&& ev){
-      auto tmp = once_(pollrateFinish, ev); 
-      thread_([tmp,this](){ tmp.get(); this->stop(); })();
+      auto tmp = launch_until_(pollrateFinish, ev);        //<-- launch a looping thread that polls until ev(t) returns
+      thread_([tmp,this](){ tmp.get(); this->stop(); })(); //<-- launch a thread that blocks until ev(t) returns a value
       return *this;
    }
 
    /// Execute behavior for n seconds
    behavior& over(float nsec){
-      auto tmp = once_(pollrateFinish, after_(nsec, true ) ); 
+      auto tmp = launch_until_(pollrateFinish, after_(nsec, constant_(true) ) );
       thread_([tmp,this](){ tmp.get(); this->stop(); })();
       return *this;
    }   
 
-   int mId; // id number (or make a char * or string)
-   bool bStarted = false;  //set to true after first launch
-   bool bDone = false; //set to true after stop() is called
-   std::shared_ptr<bool> bStop = std::make_shared<bool>(false);
+   int mId; 				/// id number (or make a char * or string)
+   bool bStarted = false;   /// set to true after first launch
+   bool bDone = false; 		/// set to true after stop() is called
+   /// shared interrupt pointer
+   std::shared_ptr<bool> bInterruptPtr = std::make_shared<bool>(false);
+   /// future return value
    std::shared_future<bool> mReturn;
     
-   float pollrateLaunch = .001;  // default rate of polling for launching thread
-   float pollrateFinish = .001;  // default rate of polling for thread checking finish condition
+   float pollrateLaunch = .001;  /// default rate of polling for launching thread
+   float pollrateFinish = .001;  /// default rate of polling for thread checking finish condition
 
  };
 

@@ -10,7 +10,7 @@
  *       Revision:  none
  *       Compiler:  gcc
  *
- *         Author:  Pablo Colapinto (), gmail->wolftype
+ *         Author:  Pablo Colapinto, gmail->wolftype
  *   Organization:  wolftype
  *
  * =====================================================================================

@@ -71,7 +71,7 @@ auto wait_ = [](float sec){
 };
 
 /// pass to functions that do not wait
-auto true_ = [](){ return true; };
+//auto true_ = [](){ return true; };
 
 /// pass to functions that never call
 auto false_ = [](){ return false; };

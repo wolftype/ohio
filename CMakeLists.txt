@@ -16,11 +16,15 @@ include_directories(${PROJECT_SOURCE_DIR}/ext/hana/include)
 link_directories(${PROJECT_BINARY_DIR})
 
 #LIBRARY
-add_library(json ext/json/jsoncpp.cpp)
-set(libraries json)
+#add_library(json ext/json/jsoncpp.cpp)
+#set(libraries json)
 
 #CXX FLAGS (C++14 required)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -g -o0")
+
+#Add Headers as Custom Target for Editing in IDES
+FILE(GLOB_RECURSE HeaderFiles "${PROJECT_SOURCE_DIR}/include/*")
+add_custom_target(headers SOURCES ${HeaderFiles})
 
 #EXECUTABLE
 set( EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin )
@@ -28,7 +32,7 @@ file(GLOB tests tests/*.cpp)
 foreach(filename ${tests})
   get_filename_component(target ${filename} NAME_WE)
   add_executable(${target} ${filename} )
-  target_link_libraries(${target} ${libraries} )
+#  target_link_libraries(${target} ${libraries} )
 endforeach()
 
 

@@ -20,7 +20,7 @@
 
 using namespace ohio;
 
-  auto when2_ = [](auto&& e, auto&& func){
+  auto when21_ = [](auto&& e, auto&& func){
   
     auto ce = e(0);
     using T = decltype( func( MVAL( ce ) ) );
@@ -64,17 +64,17 @@ int main(){
     return true;
   };
 
-  auto sigfun = map_(5, go_func_);
+  auto sigfun = over_(.5, 5, go_func_);
 
   auto e = every_(.5, test_(2) );
 
-  auto w = when2_(e, proc2_);
+ // auto w = apply_when_(e, proc_);
 
  // behavior b;
  // b.launch( e );
 
   while ( wait_(.001)() ){
-   auto& x =  w( time_() );
+   auto x =  e( time_() );
   }
 
   return 0;

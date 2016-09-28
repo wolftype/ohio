@@ -66,7 +66,7 @@ auto dasync_ = [](auto&& f){
 
 
 /// await a future variable then do something with it
-auto then_ =[](auto&& f){
+auto thread_then_ =[](auto&& f){
   return [=](auto&& fut){
     return f( fut.get() );
   };

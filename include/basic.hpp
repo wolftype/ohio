@@ -29,35 +29,61 @@
 #include "time.hpp"
 #include "macros.hpp"
 
-
 namespace hana = boost::hana;
 namespace ohio {
 
 template<class T>
 using maybe = std::experimental::optional<T>;
 
+template<class T>
+decltype(auto) maybeValue( T&& f){
+    return FORWARD(f);
+}
 
+template<class T>
+decltype(auto) maybeValue( maybe<T>&& m){
+    if (m) return maybeValue( *m );
+    return maybeValue( T() );
+}
+
+
+/// Print anything
 auto print_ = [](auto&& xs){
   std::cout << "printing: " << xs << std::endl;
   return true;
 };
 
+/// Print a bunch of things
 auto printall_ = [](auto&& ... xs) {
   return hana::transform( hana::make_tuple(xs...),  print_);
 };
 
+/// Return Zero
 auto zero_ = [](auto&& ... xs){
   return 0;
 };
 
+
+
+/// Call a function
 auto do_ = [](auto&& f){
   return f();
 };
 
 /// send time through process f
-auto proc_ = [](auto&& f){
-  return f( time_() );
+auto proc_old_ = [](auto&& f){
+  return FORWARD(f)( time_() );
 };
+
+struct proc_t {
+
+    template<class F>
+    constexpr decltype(auto) operator()(F&&f) const& {
+        return FORWARD(f)( time_() );
+    }
+};
+
+proc_t proc_;
 
 /*-----------------------------------------------------------------------------
  *  Basic functions a -> a
@@ -76,6 +102,17 @@ auto mod_ = [](int&& x){
      return t % x;
   };
 };
+
+/*
+/// Linear clamp
+auto linear_ = [](float&& sec){
+    return[=](int&& x){
+        auto val = ((float)x/1000.0)/sec;
+        return val > 1 ? 1 : val;
+    };
+};
+*/
+
 
 auto secs_to_milli = [](auto&& secs){ return secs * 1000; };
 auto secs_to_micro = [](auto&& secs){ return secs * 1000000; };
