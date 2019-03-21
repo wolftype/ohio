@@ -63,8 +63,6 @@ auto zero_ = [](auto&& ... xs){
   return 0;
 };
 
-
-
 /// Call a function
 auto do_ = [](auto&& f){
   return f();

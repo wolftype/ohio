@@ -29,7 +29,7 @@ done
 
 if [ $RUN_CMAKE = 1 ]; then
 
-  cmake ..
+  cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1 ..
 fi
 
 make VERBOSE=1-- $TARGET

@@ -118,31 +118,30 @@ int main(){
 
   AppStartTime = now();
 
-  bool bTrigger = false;
-
-  auto print = [](auto&& t){ cout << t << endl; return true; };
-  auto trigger = [&](){ bTrigger = !bTrigger; return true; };
+//  bool bTrigger = false;
 //
-  auto reset = reset4_();
-  auto e1 = ohio::tag_( triggerval_( bTrigger ), print );
-  auto e2 = every_(.1, constant_(trigger) );
-  auto e3 = after_(5, constant_(trigger) );
-
-  auto e4 = over4_(3, [](float t){ cout << t << endl; return true; } );
-  auto e5 = every4_(.5,e4);
-//  auto e6 = after4_(.2,e4); /// this does not work yet
+//  auto print = [](auto&& t){ cout << t << endl; return true; };
+//  auto trigger = [&](){ bTrigger = !bTrigger; return true; };
 //
-  auto b = behavior();
-  b.launch(e1);
+//  auto reset = reset4_();
+//  auto e1 = ohio::tag_( triggerval_( bTrigger ), print );
+//  auto e2 = every_(.1, constant_(trigger) );
+//  auto e3 = after_(5, constant_(trigger) );
 //
+//  auto e4 = over4_(3, [](float t){ cout << t << endl; return true; } );
+//  auto e5 = every4_(.5,e4);
 //
-  auto f = when4_( e5, proc_ );
+////  auto e6 = after4_(.2,e4); /// this does not work yet
+//
+//  auto b = behavior();
+//  b.launch(e1);
+//
+//  auto f = when4_( e5, proc_ );
+//
+//  while ( wait_(.001)() ){
+//    e5( time_() );
+//   }
 
-  while ( wait_(.001)() ){
-   // f( time_() );
-    e5( time_() );// << endl;
-//      e2( time_() );
-   }
-
+  return 0;
 
 }

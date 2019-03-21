@@ -1,6 +1,7 @@
 /// launching behaviors
 
 #include "behavior.hpp"
+#include <vector>
 
 using namespace ohio;
 
@@ -11,7 +12,7 @@ struct buffer_t{
     float sec = 0;
 
     //std::unique_ptr<char[]> val;
-    std::vector<unsigned char> val;
+    std::vector<unsigned char> val = {};
 
     template<typename T>
     void init(){
