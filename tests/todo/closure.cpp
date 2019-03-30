@@ -3,7 +3,7 @@
  *
  *       Filename:  closure.cpp
  *
- *    Description:  
+ *    Description:
  *
  *        Version:  1.0
  *        Created:  05/12/2016 15:44:11
@@ -40,7 +40,7 @@ auto impulse2_ = [](float&& x){
     auto mn = maybe<T>();
     return[=](int&& t) mutable -> maybe<T>& {
       using F = typename std::decay<decltype(t)>::type;
-      if ( imp( std::forward< F >(t)) ){ 
+      if ( imp( std::forward< F >(t)) ){
         cout << "y" << endl;
         return my; //maybe<T>( std::forward<T>(e) );
       }
@@ -80,14 +80,14 @@ int main(){
     auto my = maybe<T>(e);
     auto mn = maybe<T>();
 
-    return[=](auto&& t) mutable -> maybe<T>& { 
-      //if (t>1000) 
+    return[=](auto&& t) mutable -> maybe<T>& {
+      //if (t>1000)
         return my;
       //else return mn;
     };
   };
 
-  
+
 
   auto tmp =  every_(.5, clos());//every3_(.5, clos() );
   auto imp = impulse2_( 1.0/.5 );

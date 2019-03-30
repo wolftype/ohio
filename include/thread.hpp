@@ -23,6 +23,18 @@ auto thread_ = [](auto&& f){
   };
 };
 
+/// start function in a new thread and detach, returning the future value
+auto thread_future_ = [](auto&& f){
+  //forward
+  return [=](auto&& ... xs){
+    using T = TYPE(f(xs...));
+    std::packaged_task<T(TYPE(xs)...)> task(f);
+    std::future<T> fut = task.get_future();
+    std::thread(std::move(task)).detach();
+    return fut;
+  };
+};
+
 /// start function in a new thread and detach, returning true
 auto thread_args_ = [](auto&& f, auto&& ... xs){
   //forward
@@ -35,11 +47,12 @@ auto thread_args_ = [](auto&& f, auto&& ... xs){
 /// start async function in a new thread
 /// returns shared future immediately, can be passed to multiple listeners that wait for it
 /// T may be a function itself
+/// todo -- add a deferred only policy?
 auto async_ = [](auto&& f){
   //using F = typename std::decay< decltype(f) >::type;
   return [=](auto&& ... xs) {
     using T = decltype( f(std::forward< typename std::decay< decltype(xs) >::type > (xs)...) );
-    cout << "launching async thread" << endl;
+    cout << "launching shared async thread" << endl;
     std::shared_future<T> sf = std::async( f, std::forward< typename std::decay< decltype(xs) >::type > (xs)...);
     return sf;
     //std::shared_future<T> (
@@ -47,7 +60,7 @@ auto async_ = [](auto&& f){
   };
 };
 
-/// non-shared future
+/// start async function lazy or synchronous, returns non-shared future fetchable with .get()
 auto asyncf_ = [](auto&& f){
   return [=](auto&& ... xs) {
     cout << "launching non-shared async thread" << endl;
@@ -55,7 +68,7 @@ auto asyncf_ = [](auto&& f){
   };
 };
 
-/// deferred asynchronous function called when future is gotten
+/// start async function lazy, returns non-shared future, triggered with .get()
 auto dasync_ = [](auto&& f){
   return [=](auto&& ... xs){
     cout << "launching deferred thread" << endl;

@@ -19,6 +19,7 @@ namespace ohio{
   auto stdin_ = []( auto&& ... xs){
     std::string str;
     std::cin >> str;
+    std::cout << "test"<< endl;
     return str;
   };
 
@@ -393,7 +394,7 @@ namespace ohio{
   /// ... thread is detached and lives until interrupt flag is set by another thread
   /// ... at which point the thread returns a future
   /// @todo possibly return a value from the scheduled ops? also, split into concurrent threads?
-  /// @sa spawn_
+  /// @sa spawn_ and behavior
   auto callback_ = [](auto&& cb, std::shared_ptr<bool>& interrupt_flag, auto&& pollrate){
 
 

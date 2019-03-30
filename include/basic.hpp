@@ -46,6 +46,31 @@ decltype(auto) maybeValue( maybe<T>&& m){
     return maybeValue( T() );
 }
 
+// apply f
+auto transform_ = [](auto&& f)
+{
+  return [=](auto&& x){
+    return hana::transform(x, f);
+  };
+};
+
+
+/// Print anything do not carriage return
+auto cout_ = [](auto&& xs){
+  std::cout << xs;
+  return true;
+};
+
+/// carriage return
+auto endl_ = [](auto&& xs){
+  std::cout << std::endl;;
+  return true;
+};
+
+/// Print anything do not carriage return
+auto coutall_ = [](auto&& ... xs){
+  return hana::transform( hana::make_tuple(xs...),  cout_);
+};
 
 /// Print anything
 auto print_ = [](auto&& xs){
@@ -122,7 +147,7 @@ auto secs_to_micro = [](auto&& secs){ return secs * 1000000; };
 
 /// Signal eq_(<X>) Takes a Y and Compares it with X
 auto eq_ = [](auto&& x){
-  return[=](auto&& y){ return x==y ? true : false; };
+  return[=](auto&& y){ return y==x ? true : false; };
 };
 
 /// Signal gt_(<X>) Takes a Y and Compares it with X

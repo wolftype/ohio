@@ -30,11 +30,17 @@ namespace ohio {
  *  ARROW combinators, take processes and return functions that switch processes
  *-----------------------------------------------------------------------------*/
 
-/// do function f1 and then function f2 on same input 
+/// do function f1 and then function f2 on same input
 auto seq_ = [](auto&& f1, auto&& f2){
   return[=](auto&& ... xs){
     f1(xs...);
     f2(xs...);
+  };
+};
+
+auto all_ = [](auto&& ... sf){
+  return [=](auto&& ... xs) mutable {
+    return hana::make_tuple (sf(std::forward<typename std::decay< decltype(xs)>::type >(xs)...)...);
   };
 };
 
@@ -87,10 +93,16 @@ auto pair_ = [](auto&& a, auto&& b){
   return hana::make_pair(a,b);
 };
 
-/// merge a pair with binary function f (e.g add_, print_, mult_) 
+/// merge a pair with binary function f (e.g add_, print_, mult_)
 auto merge_ = [](auto&& f){
   return [=](auto&& xs){ //xs is a Product type
     return f( hana::first(xs), hana::second(xs) );
+  };
+};
+
+auto mergeall_ = [](auto&& f){
+  return [=](auto&& ... xs) mutable{
+    return f( FORWARD(xs)...);
   };
 };
 
@@ -237,7 +249,6 @@ namespace boost { namespace hana {
     };
 
 
- //   constexpr detail::create<_split> split_{};
     constexpr _make_split split_{};
 
 

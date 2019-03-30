@@ -32,7 +32,7 @@ namespace ohio{
 ///  @todo how to handle shared_ptr and shared_future on destruction
 ///  @todo add a `then( e )` method
 struct behavior{
-   
+
   // F f;
    ~behavior(){
       stop();
@@ -42,16 +42,18 @@ struct behavior{
    /// launch behavior callbacks
    template<class ... e>
    behavior& launch(e&& ... es )  {
-     stop();                               // stop behavior if it is already running
+     // stop behavior if it is already running
+     stop();
      bDone = false;
+
      auto tmp = callback_( proc_, bInterruptPtr, pollrateLaunch );
-     mReturn = tmp( FORWARD(es)...);	   // future value which will return when interrupted
-     //std::forward< typename std::decay< decltype(es)>::type >(es)...);
+     // future value which will return when interrupted
+     mReturn = tmp( FORWARD(es)...);
      bStarted = true;
      return *this;
    }
 
-   /// stop behavior
+   ///stop the behavior
    ///@todo check that mReturn is valid, i.e. has been launched
    void stop(){
      if (bStarted) interrupt_( bInterruptPtr, mReturn )();
@@ -61,8 +63,10 @@ struct behavior{
    /// Execute behavior until ev returns true
    template<class T>
    behavior& until(T&& ev){
-      auto tmp = launch_until_(pollrateFinish, ev);        //<-- launch a looping thread that polls until ev(t) returns
-      thread_([tmp,this](){ tmp.get(); this->stop(); })(); //<-- launch a thread that blocks until ev(t) returns a value
+      // launch a looping thread that polls until ev(t) returns
+      auto tmp = launch_until_(pollrateFinish, ev);     
+      //launch a thread that blocks until ev(t) returns a value
+      thread_([tmp,this](){ tmp.get(); this->stop(); })();
       return *this;
    }
 
@@ -71,7 +75,7 @@ struct behavior{
       auto tmp = launch_until_(pollrateFinish, after_(nsec, constant_(true) ) );
       thread_([tmp,this](){ tmp.get(); this->stop(); })();
       return *this;
-   }   
+   }
 
    int mId; 				/// id number (or make a char * or string)
    bool bStarted = false;   /// set to true after first launch
@@ -80,7 +84,7 @@ struct behavior{
    std::shared_ptr<bool> bInterruptPtr = std::make_shared<bool>(false);
    /// future return value
    std::shared_future<bool> mReturn;
-    
+
    float pollrateLaunch = .001;  /// default rate of polling for launching thread
    float pollrateFinish = .001;  /// default rate of polling for thread checking finish condition
 

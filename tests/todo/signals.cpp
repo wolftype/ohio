@@ -21,12 +21,12 @@
 using namespace ohio;
 
   auto when21_ = [](auto&& e, auto&& func){
-  
+
     auto ce = e(0);
     using T = decltype( func( MVAL( ce ) ) );
     auto my = maybe<T>();
     auto mn = maybe<T>();
-    
+
     return [=](int&& xs) mutable -> maybe<T>& {
       auto& te = FORWARD(e)( FORWARD(xs) );
       if (te) {
@@ -57,8 +57,8 @@ auto test_ = [](auto&& v){
 
 int main(){
 
-  AppStartTime = now();  
-  
+  AppStartTime = now();
+
   auto go_func_ = [](auto&& t){
     cout << t << endl;
     return true;
