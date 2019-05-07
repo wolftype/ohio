@@ -16,6 +16,8 @@ Per thread timing functions
 
 * `wait_ : wait_(float) -> (float->float)`  Signal in Milliseconds since AppStartTime
 
+* `start_timer_ : start_timer_() -> (_ -> float)` Time in Milliseconds since last called
+
 
 ##thread.cpp
 Asynchronous functions

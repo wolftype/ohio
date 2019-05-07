@@ -30,6 +30,9 @@ auto id_ = [](auto &&x) { return x; };
 /// "Lift" true onto a signal --  true_ : true_(t) -> true
 auto true_ = [](auto &&x) { return true; };
 
+/// "Lift" false onto a signal --  false_ : false_(t) -> true
+auto false_ = [](auto &&x) { return false; };
+
 /// just : Return wrapped Input (e.g bypass) -- id_ : id_(x) -> x
 auto just_ = [](auto &&x) { return maybe<TYPE(x)>(x); };
 
@@ -65,14 +68,14 @@ auto switch_once_ = [](auto &&sf1, auto &&sf2) {
 };
 
 /// if signal is true, return result TODO looks f'ed
-auto if_ = [](auto &&x) {
-  return [=](auto &&e) {
-    using T = TYPE (e);
-    if (e)
-      return maybe<T> (x);
-    return maybe<T> ();
-  };
-};
+//auto if_ = [](auto &&x) {
+//  return [=](auto &&e) {
+//    using T = TYPE (e);
+//    if (e)
+//      return maybe<T> (x);
+//    return maybe<T> ();
+//  };
+//};
 
 /// conditional event (unused)
 auto cond_ = [](auto &&f) {
@@ -115,6 +118,7 @@ auto trigger_on_edge_ = []() {
 
 /// trigger an increasing signal has been reset (use with mod_)
 // really, trigger on no longer increasing
+// NOTE: should potentially be shared_ptr<double> ?
 auto trigger_on_reset_ = []() {
   double start;
   start = 0;

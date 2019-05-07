@@ -44,10 +44,10 @@ struct behavior{
    behavior& launch(e&& ... es )  {
      // stop behavior if it is already running
      stop();
+     // now restart
      bDone = false;
-
-     auto tmp = callback_( proc_, bInterruptPtr, pollrateLaunch );
-     // future value which will return when interrupted
+     auto tmp = callback_( id_, bInterruptPtr, pollrateLaunch );
+     // a future value will return when interrupted
      mReturn = tmp( FORWARD(es)...);
      bStarted = true;
      return *this;
@@ -64,7 +64,7 @@ struct behavior{
    template<class T>
    behavior& until(T&& ev){
       // launch a looping thread that polls until ev(t) returns
-      auto tmp = launch_until_(pollrateFinish, ev);     
+      auto tmp = launch_until_(pollrateFinish, ev);
       //launch a thread that blocks until ev(t) returns a value
       thread_([tmp,this](){ tmp.get(); this->stop(); })();
       return *this;

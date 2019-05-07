@@ -4,6 +4,8 @@
  *       Filename:  reference.cpp
  *
  *    Description:  what is retained -- also some questions:
+ *
+ *          Many of these functions have been brought into event.hpp
 
             Some differences here: rather than return maybe events which
             must then be evaluated, the signals here return the evaluated

@@ -33,4 +33,11 @@ if [ $RUN_CMAKE = 1 ]; then
 fi
 
 make VERBOSE=1-- $TARGET
+
+echo "disabling echo and canonical input in shell"
+#tput civis
+stty -echo -icanon
 ./bin/$TARGET
+echo "re-enabling echo and canonical input in shell"
+stty echo icanon
+#tput cnorm

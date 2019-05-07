@@ -10,19 +10,36 @@
 #include "time.hpp"
 #include "signal.hpp"
 
+  /**
+  * NOTE: a lof of these functions pass captured mutable
+  * variables but most or all these variable should be
+  * shared_ptrs to remain coherent across threads.
+  *
+  * This will allow them to be called in threads other
+  * than the ones in which they are captured.
+  *
+  */
+
 namespace hana = boost::hana;
-namespace ohio{
+namespace ohio {
 
   /*-----------------------------------------------------------------------------
-   *  SOME io
+   *  SOME io (move to basic.hpp)
    *-----------------------------------------------------------------------------*/
   auto stdin_ = []( auto&& ... xs){
     std::string str;
     std::cin >> str;
-    std::cout << "test"<< endl;
     return str;
   };
 
+  auto nothing_ = [](auto&& ...xs){
+    return;
+  };
+
+  auto getchar_ = [](auto&& ... xs){
+    nothing_ (xs ...);
+    return getchar();
+  };
   /*
   /// execute signal function sf1 until event e, then execute function sf2
   /// sf1 takes an xs and returns a pair and sf2 takes an event and an xs and returns a b
@@ -269,6 +286,19 @@ namespace ohio{
       };
     };
 
+ //just_ is in signals.hpp, it takes and does x -> maybe x.
+ //here we want an x(f) -> maybe (apply f)
+ //ah, what?
+ //or maybe an fmap
+ //or, huh, what if
+ //x must be a function whose return can be evaluated as true.
+ auto if_ = [](auto && x)
+ {
+   return when_(x, id_);
+ };
+
+
+
   /// every nsecs call e(t).  Signature: (a->b) -> (a->maybe b)
   auto every_ = [](auto&& nsecs, auto&& e){
     return when_(impulse_(1.0/nsecs), FORWARD(e));
@@ -342,11 +372,15 @@ namespace ohio{
 //    };
 
 
-  /// when e returns an event, apply func to result
+  /// when e returns an optional event, apply func to result of e
+  /// different from when_ in that func is applied to result as opposed
+  /// to signal
   auto then_ = [](auto&& e, auto&& func){
       return[=](auto&& ... xs) mutable {
-        auto me = FORWARD(e)(FORWARD(xs)...); 				//maybe me returns from e and may or may not exist
-        using T = TYPE( func( maybeValue(me) ) );   	    //type T returned from operating on it with func
+ 				//e returns a maybe
+        auto me = FORWARD(e)(FORWARD(xs)...);
+        using T = TYPE( func( std::declval<typename decltype(me)::value_type>() ));
+       // using T = TYPE( func( me ) );
         if (me) return maybe<T>( FORWARD(func)( *me ) );	//actual operation
         return maybe<T>();
       };
@@ -390,9 +424,11 @@ namespace ohio{
     };
   };
 
-  ///launch a thread that applies a callback onto a potential event whenever it returns something
-  /// ... thread is detached and lives until interrupt flag is set by another thread
+  ///launch a thread that applies a callback onto the maybe result of an event
+  // (i.e. whenever it returns something)
+  /// ... thread is detached and lives until interrupt flag is set (by any thread)
   /// ... at which point the thread returns a future
+  /// @todo explain why the split_ is necessary
   /// @todo possibly return a value from the scheduled ops? also, split into concurrent threads?
   /// @sa spawn_ and behavior
   auto callback_ = [](auto&& cb, std::shared_ptr<bool>& interrupt_flag, auto&& pollrate){
@@ -400,8 +436,8 @@ namespace ohio{
 
     return [=,&interrupt_flag](auto&& ... e) mutable {
 
-      auto sched = hana::split_( zero_, then_(e, cb)... ); //so, when e happens and returns x, callback processes x
-      //using T = sched...
+      //e returns maybe an x. if so, callback processes x
+      auto sched = hana::split_( zero_, then_(e, cb)... );
 
       // return shared_future (when this returns, interrupt has been set)
       return async_(
@@ -555,6 +591,8 @@ detail::create<_when> when2_ {};
 }} //boost::hana::
 #endif /* end of include guard: OHIO_EVENT_INCLUDED */
 
+
+//this old stuff returns maybes, we prefer to r
 /*
 /// will generate one event e at specific time sec (relative to AppStartTime)
 auto at2_ = [](auto&& sec, auto&& e){

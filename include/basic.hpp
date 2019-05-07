@@ -17,8 +17,8 @@
  */
 
 
-#ifndef  basic_INC
-#define  basic_INC
+#ifndef basic_INC
+#define basic_INC
 
 #include <math.h>
 #include <iostream>
@@ -32,78 +32,46 @@
 namespace hana = boost::hana;
 namespace ohio {
 
-template<class T>
+template <class T>
 using maybe = std::experimental::optional<T>;
 
-template<class T>
-decltype(auto) maybeValue( T&& f){
-    return FORWARD(f);
+template <class T>
+decltype (auto) maybeValue (T &&f)
+{
+  return FORWARD (f);
 }
 
-template<class T>
-decltype(auto) maybeValue( maybe<T>&& m){
-    if (m) return maybeValue( *m );
-    return maybeValue( T() );
+template <class T>
+decltype (auto) maybeValue (maybe<T> &&m)
+{
+  if (m)
+    return maybeValue (*m);
+  return maybeValue (T ());
 }
 
 // apply f
-auto transform_ = [](auto&& f)
-{
-  return [=](auto&& x){
-    return hana::transform(x, f);
-  };
+auto transform_ = [](auto &&f) {
+  return [=](auto &&x) { return hana::transform (x, f); };
 };
 
-
-/// Print anything do not carriage return
-auto cout_ = [](auto&& xs){
-  std::cout << xs;
-  return true;
-};
-
-/// carriage return
-auto endl_ = [](auto&& xs){
-  std::cout << std::endl;;
-  return true;
-};
-
-/// Print anything do not carriage return
-auto coutall_ = [](auto&& ... xs){
-  return hana::transform( hana::make_tuple(xs...),  cout_);
-};
-
-/// Print anything
-auto print_ = [](auto&& xs){
-  std::cout << "printing: " << xs << std::endl;
-  return true;
-};
-
-/// Print a bunch of things
-auto printall_ = [](auto&& ... xs) {
-  return hana::transform( hana::make_tuple(xs...),  print_);
-};
 
 /// Return Zero
-auto zero_ = [](auto&& ... xs){
-  return 0;
-};
+auto zero_ = [](auto &&... xs) { return 0; };
 
 /// Call a function
-auto do_ = [](auto&& f){
-  return f();
-};
+auto do_ = [](auto &&f) { return f (); };
 
 /// send time through process f
-auto proc_old_ = [](auto&& f){
-  return FORWARD(f)( time_() );
-};
+auto proc_old_ = [](auto &&f) { return FORWARD (f) (time_ ()); };
 
-struct proc_t {
+struct proc_t
+{
 
-    template<class F>
-    constexpr decltype(auto) operator()(F&&f) const& {
-        return FORWARD(f)( time_() );
-    }
+  template <class F>
+  constexpr decltype (auto) operator() (F &&f) const &
+  {
+    return FORWARD (f) (time_ ());
+  }
 };
 
 proc_t proc_;
@@ -112,19 +80,13 @@ proc_t proc_;
  *  Basic functions a -> a
 *-----------------------------------------------------------------------------*/
 /// Sine
-auto sin_ = [](float t){
-  return sin(t);
-};
+auto sin_ = [](float t) { return sin (t); };
 
 /// Takes an X in degrees and returns in radians
-auto to_radians_ = [](auto&& x){ return x * (3.14/180.0); };
+auto to_radians_ = [](auto &&x) { return x * (3.14 / 180.0); };
 
 /// Integer Modulus (e.g. for ramps)
-auto mod_ = [](int&& x){
-  return [=](int&& t){
-     return t % x;
-  };
-};
+auto mod_ = [](int &&x) { return [=](int &&t) { return t % x; }; };
 
 /*
 /// Linear clamp
@@ -137,8 +99,8 @@ auto linear_ = [](float&& sec){
 */
 
 
-auto secs_to_milli = [](auto&& secs){ return secs * 1000; };
-auto secs_to_micro = [](auto&& secs){ return secs * 1000000; };
+auto secs_to_milli = [](auto &&secs) { return secs * 1000; };
+auto secs_to_micro = [](auto &&secs) { return secs * 1000000; };
 
 
 /*-----------------------------------------------------------------------------
@@ -146,48 +108,42 @@ auto secs_to_micro = [](auto&& secs){ return secs * 1000000; };
  *-----------------------------------------------------------------------------*/
 
 /// Signal eq_(<X>) Takes a Y and Compares it with X
-auto eq_ = [](auto&& x){
-  return[=](auto&& y){ return y==x ? true : false; };
+auto eq_ = [](auto &&x) {
+  return [=](auto &&y) { return y == x ? true : false; };
 };
 
 /// Signal gt_(<X>) Takes a Y and Compares it with X
-auto gt_ = [](auto&& x){
-  return [=](auto&& y){ return y>x ? true : false; };
+auto gt_ = [](auto &&x) {
+  return [=](auto &&y) { return y > x ? true : false; };
 };
 
 /// Signal lt_(<X>) Takes a Y and Compares it with X
-auto lt_ = [](auto&& x){
-  return [=](auto&& y){ return y<x ? true : false; };
+auto lt_ = [](auto &&x) {
+  return [=](auto &&y) { return y < x ? true : false; };
 };
 
 /// Signal divide_by_(<X>) Takes a Y and divides it by X
-auto divide_by_ = [](auto&& x){
-  return [=](auto&& y){ return y/x; };
-};
+auto divide_by_ = [](auto &&x) { return [=](auto &&y) { return y / x; }; };
 
 /// Signal subtract from (<X>) takes a Y and subtracts it from X
-auto subtract_from_ = [](auto&& X){
-  return [=](auto&& y){ return X-y; };
-};
+auto subtract_from_ = [](auto &&X) { return [=](auto &&y) { return X - y; }; };
 
 /*-----------------------------------------------------------------------------
  *  /// binary operations (use with merge_ to combine two streams)
  *-----------------------------------------------------------------------------*/
-auto plus_ = [](auto&& a, auto&& b){
-  return a + b;
+auto plus_ = [](auto &&a, auto &&b) { return a + b; };
+
+auto div_ = [](auto &&a, auto &&b) { return a / b; };
+
+auto mult_ = [](auto &&a, auto &&b) { return a * b; };
+
+auto add_ = [](auto &&a) { return [=](auto &&b) { return plus_ (a, b); }; };
+
+auto clamp_ = [](auto &&min, auto &&max) {
+  return [=](auto &&b) { return b < min ? min : b > max ? max : b; };
 };
 
-auto div_ = [](auto&& a, auto&& b){
-  return a / b;
-};
 
-auto mult_ = [](auto&& a, auto&& b){
-  return a * b;
-};
+}  // ohio::
 
-
-
-
-} // ohio::
-
-#endif   /* ----- #ifndef basic_INC  ----- */
+#endif /* ----- #ifndef basic_INC  ----- */

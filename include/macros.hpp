@@ -52,6 +52,17 @@ namespace ohio {
 #define BOLDMAGENTA "\033[1m\033[35m" /* Bold Magenta */
 #define BOLDCYAN "\033[1m\033[36m"    /* Bold Cyan */
 #define BOLDWHITE "\033[1m\033[37m"   /* Bold White */
+
+// 105 - 108 are the ijkl keys
+#define LEFT 104
+#define RIGHT 108
+#define UP 107
+#define DOWN 106
+
+
+
+#define CLEARLINE "\033[D\033[K"      /* Move left and clear line*/
+#define TREX "\U0001F996"             /* Dinosaur */
 }
 
 

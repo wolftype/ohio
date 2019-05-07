@@ -30,7 +30,8 @@ namespace ohio {
  *-----------------------------------------------------------------------------*/
 
 /// Global variable set at initiation of Application
-std::chrono::time_point<std::chrono::steady_clock> AppStartTime;
+using TimePoint = std::chrono::time_point<std::chrono::steady_clock>;
+TimePoint AppStartTime;
 
 std::map< std::string, int> inputMap;
 
@@ -50,6 +51,8 @@ auto microseconds = []( auto duration ){
 /// Return Time Since App Start in milliseconds
 auto time_ = []() -> int { return milliseconds( now() - AppStartTime ); };
 
+/// Return Time Since previous time in milliseconds
+auto time_since_ = [](auto&& time) -> int { return milliseconds( now() - time ); };
 
 /*-----------------------------------------------------------------------------
  *  std::this_thread Sleep and Atomic Ticker
@@ -70,12 +73,20 @@ auto wait_ = [](float sec){
   };
 };
 
-/// pass to functions that do not wait
-//auto true_ = [](){ return true; };
-
-/// pass to functions that never call
-auto false_ = [](){ return false; };
-
+/// timer since it was last called
+/// note that the past_time is stored as a
+/// shared ptr, otherwise if this is launched
+/// in some new thread, we'll lose the capture
+auto start_timer_ = []() {
+  std::shared_ptr<TimePoint> past_time = std::make_shared<TimePoint> ();
+  *past_time = now ();
+  return [=](auto &&... ys) mutable {
+    auto cur_time = now ();
+    auto time_lapsed = milliseconds (cur_time - *past_time);
+    *past_time = cur_time;
+    return time_lapsed;
+  };
+};
 
 /*-----------------------------------------------------------------------------
  *  Atomic CLOCK tick tocker
