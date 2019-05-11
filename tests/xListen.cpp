@@ -67,28 +67,25 @@ int main ()
   auto trace = pipe_ (graph_ (1), pre_ ("\r"));
   // auto plot = pipe_ (plot_ (1), cout_with_ ("", ""));
 
-  //this will calculate absolute x and y position based on keys pressed
+  //this will calculate ABSOLUTE x and y position based on keys pressed
   //see macros (uses vim bindings LEFT=h, RIGHT=l, DOWN=j, UP=k)
   auto x_val = start_tally (LEFT, RIGHT);
   auto y_val = start_tally (UP, DOWN);
   auto abs = and_(x_val, y_val);
 
-  //this will calculate relative x and y position based on keys pressed
-  //todo add start_timer_
+  //this will calculate RELATIVE x and y position based on keys pressed
   auto x_diff = diff (LEFT, RIGHT);
   auto y_diff = diff (DOWN, UP);
   auto rel = and_(x_diff, y_diff);
 
-  //merge the values into a movement, then print the TREX unicode there
-  // auto graph = pipe_(and_ (x_val, y_val), merge_ (move_to_), cout_with_("", TREX));
-  //auto place = first_ (trace);
-  //auto output = merge_(coutall_);
 
-  auto place = putXY_ (TREX);
-  auto output = coutall_;
+  auto abs_place = putXY_ (TREX);
+
+  auto output = pipe_(coutall_, flush_);
   //auto graph = pipe_ (abs, place, output);
 
-   auto graph = pipe_ (rel, merge_(move_by_), post_("HELL"), output);
+  //merge the values into a movement, then print the unicode there
+   auto graph = pipe_ (rel, merge_(move_by_), append_(place_(CHICKEN)), output);
 
   // This will print the time since last it was called
   // Q: How to get that time to print as well?
@@ -97,6 +94,8 @@ int main ()
   // this will launch and repeat
   auto fut = repeat_pipe_ (getchar_, graph);
 
+//  std::cout << string_right_("hello") << move_by_(1,2) << string_right_("XXX") << move_by_(0,-2) << std::flush;
+//
   while (tick ())
     {
     }

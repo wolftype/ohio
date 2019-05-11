@@ -7,6 +7,19 @@ namespace ohio {
 
 using hana::pipe_;
 
+/// endline
+auto endl_ = [](auto &&xs) {
+  std::cout << std::endl;
+  return true;
+};
+
+/// flush
+auto flush_ = [](auto &&xs) {
+  std::cout << std::flush;
+  return true;
+};
+
+
 /// Print anything do not carriage return
 auto cout_ = [](auto &&xs) {
   std::cout << xs;
@@ -19,13 +32,6 @@ auto cout_with_ = [](auto &&start, auto &&end) {
     std::cout << start << y << end;
     return true;
   };
-};
-
-/// carriage return
-auto endl_ = [](auto &&xs) {
-  std::cout << std::endl;
-  ;
-  return true;
 };
 
 /// Print anything do not carriage return
@@ -143,11 +149,12 @@ auto clear_ = [](float height) {
 auto move_by_ = [](float x, float y) {
   std::stringstream stream;
 
-  stream << "\033[" << (int) (y >= 0 ? y : abs (y)) << (y > 0 ? "A" : "B");
-  stream << (x > 0  && y > 0 ? "\033[1D" : ""); 
+  if (y != 0)
+    stream << "\033[" << abs (y) << (y > 0 ? "A" : "B");
 
-  stream << "\033[" << (int) (x >= 0 ? x : abs (x-1)) << (x > 0 ? "C" : "D");
-  stream << (y == 0 ? "\033[1A" : "");
+  if (x != 0)
+    stream << "\033[" << abs (x) << (x > 0 ? "C" : "D");
+
   return stream.str ();
 };
 
@@ -158,8 +165,37 @@ auto move_to_ = [](float x, float y) {
   return stream.str ();
 };
 
+
+// make a string and send cursor back to beginning of it
+auto string_right_ = [](auto &&p) {
+  std::string t (p);
+  std::stringstream stream;
+  stream << t << "\033[" << t.length () << "D";
+  return stream.str ();
+};
+
+// make a char and send cursor back 1
+auto place_= [](auto &&c) {
+  std::stringstream stream;
+  stream << c << "\033[" << 1 << "D";
+  return stream.str ();
+};
+// todo make a string backwards?
+auto string_left_ = [](auto &&p) {
+  std::string t (p);
+  std::stringstream stream;
+  stream << t << "\033[" << t.length () << "D";
+  return stream.str ();
+};
+
+//place a character at a coordinate,
+//takes a pair of values representing X and Y
+auto putXY_ = [](auto &&glyph) {
+  return pipe_ (merge_ (move_to_), place_ (glyph));
+};
+
 // prepend a string to incoming signal
-auto pre_ = [](auto &&start) {
+auto prepend_ = [](auto &&start) {
   return [=](auto &&in) {
     std::stringstream stream;
     stream << start << in;
@@ -167,8 +203,9 @@ auto pre_ = [](auto &&start) {
   };
 };
 
-// post append a string to incoming signal
-auto post_ = [](auto &&end) {
+
+// append a string to incoming signal
+auto append_ = [](auto &&end) {
   return [=](auto &&in) {
     std::stringstream stream;
     stream << in << end;
@@ -176,11 +213,12 @@ auto post_ = [](auto &&end) {
   };
 };
 
-//place a character at a coordinate,
-//takes a pair of values representing X and Y
-auto putXY_ = [](auto &&glyph) {
-  return pipe_ (merge_ (move_to_), post_ (glyph));
-};
+/// erase to end of line
+auto erase_ = prepend_("\033[K");
+/// go to begining of line
+auto return_ = prepend_("\r");
+/// clears current line (effectively returns then erases);
+auto clearline_ = pipe_(erase_, return_);
 
 
 }  // ohio::

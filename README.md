@@ -15,7 +15,7 @@ When it is finished, you could make:
 
 ### Composing Signal Functions:
 
-The basic idea of FRP is that you combine very basic signals (like a sinewave or
+The basic idea of FRP is that you combine signals (like a sinewave or
 a keyboard key) into signal functions (functions that create signals) and then
 start and stop the behaviors.
 

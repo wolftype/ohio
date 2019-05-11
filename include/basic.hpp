@@ -86,7 +86,7 @@ auto sin_ = [](float t) { return sin (t); };
 auto to_radians_ = [](auto &&x) { return x * (3.14 / 180.0); };
 
 /// Integer Modulus (e.g. for ramps)
-auto mod_ = [](int &&x) { return [=](int &&t) { return t % x; }; };
+auto mod_ = [](auto &&x) { return [=](auto &&t) { return (int)t % (int)x; }; };
 
 /*
 /// Linear clamp
