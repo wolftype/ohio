@@ -1,3 +1,42 @@
+# OHIO: a control system
+
+*`./run.sh test/xSignal.cpp`
+* `./run.sh test/xListen.cpp` then hit `h,j,k,l` keys
+* all the examples in `tests/` are actions: just watch them.
+* the `run.sh` script does some stuff with `stty` to muck with
+your shell input, but it undoes it (I think) afterwards.
+
+## okay, example code:
+
+```
+int main(){
+
+
+
+};
+```
+
+an **io** library
+
+## io: input/output
+
+**Q**: what do you mean by **input**?
+**A**: i mean the things you make.
+
+**Q**: what do you mean by **output**?
+**AO**: i mean the audience that finds you.
+
+
+### to try it, please **do this**:
+
+0. git clone https://github.com/wolftype/ohio.git
+1. cd ohio
+2. ./run.sh tests/xSignal.cpp
+
+This will output some signals
+
+3. hit 'q' to quit
+
 ## ohio: A tiny experimental framework for interactive signal processing
 note: very experimental and in development (not really recommended for use yet)
 

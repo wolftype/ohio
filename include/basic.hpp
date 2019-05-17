@@ -86,7 +86,9 @@ auto sin_ = [](float t) { return sin (t); };
 auto to_radians_ = [](auto &&x) { return x * (3.14 / 180.0); };
 
 /// Integer Modulus (e.g. for ramps)
-auto mod_ = [](auto &&x) { return [=](auto &&t) { return (int)t % (int)x; }; };
+auto mod_ = [](auto &&x) {
+  return [=](auto &&t) { return (int) t % (int) x; };
+};
 
 /*
 /// Linear clamp
@@ -125,19 +127,23 @@ auto lt_ = [](auto &&x) {
 /// Signal divide_by_(<X>) Takes a Y and divides it by X
 auto divide_by_ = [](auto &&x) { return [=](auto &&y) { return y / x; }; };
 
-/// Signal subtract from (<X>) takes a Y and subtracts it from X
-auto subtract_from_ = [](auto &&X) { return [=](auto &&y) { return X - y; }; };
+/// Arithmetic  (basic lifting)
+auto div_ = [](auto &&x) { return [=](auto &&y) { return y / x; }; };
+auto min_ = [](auto &&x) { return [=](auto &&y) { return y - x; }; };
+auto plus_ = [](auto &&x) { return [=](auto &&y) { return y + x; }; };
+auto mult_ = [](auto &&x) { return [=](auto &&y) { return x * y; }; };
+auto subtract_from_ = [](auto &&x) { return [=](auto &&y) { return x - y; }; };
 
 /*-----------------------------------------------------------------------------
  *  /// binary operations (use with merge_ to combine two streams)
  *-----------------------------------------------------------------------------*/
-auto plus_ = [](auto &&a, auto &&b) { return a + b; };
+auto xplus_ = [](auto &&a, auto &&b) { return a + b; };
 
-auto div_ = [](auto &&a, auto &&b) { return a / b; };
+auto xdiv_ = [](auto &&a, auto &&b) { return a / b; };
 
-auto mult_ = [](auto &&a, auto &&b) { return a * b; };
+auto xmult_ = [](auto &&a, auto &&b) { return a * b; };
 
-auto add_ = [](auto &&a) { return [=](auto &&b) { return plus_ (a, b); }; };
+auto xadd_ = [](auto &&a) { return [=](auto &&b) { return plus_ (a, b); }; };
 
 auto clamp_ = [](auto &&min, auto &&max) {
   return [=](auto &&b) { return b < min ? min : b > max ? max : b; };

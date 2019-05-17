@@ -1,5 +1,9 @@
+#ifndef GRAPHING_HAPPENING
+#define GRAPHING_HAPPENING
+
 #include <iomanip>
 #include <sstream>
+#include "basic.hpp"
 #include "macros.hpp"
 #include "arrows.hpp"
 
@@ -222,3 +226,5 @@ auto clearline_ = pipe_(erase_, return_);
 
 
 }  // ohio::
+
+#endif

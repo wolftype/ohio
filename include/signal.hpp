@@ -33,9 +33,6 @@ auto true_ = [](auto &&x) { return true; };
 /// "Lift" false onto a signal --  false_ : false_(t) -> true
 auto false_ = [](auto &&x) { return false; };
 
-/// just : Return wrapped Input (e.g bypass) -- id_ : id_(x) -> x
-auto just_ = [](auto &&x) { return maybe<TYPE(x)>(x); };
-
 /// switch_once_ takes
 //  a signalfunction sf1 that takes
 //      a t and returns

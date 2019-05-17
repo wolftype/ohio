@@ -64,7 +64,7 @@ int main ()
   auto tick = wait_ (1.0);
 
   // print a graph
-  auto trace = pipe_ (graph_ (1), pre_ ("\r"));
+  auto trace = pipe_ (graph_ (1), prepend_ ("\r"));
   // auto plot = pipe_ (plot_ (1), cout_with_ ("", ""));
 
   //this will calculate ABSOLUTE x and y position based on keys pressed
