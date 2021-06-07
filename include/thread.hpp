@@ -129,7 +129,7 @@ auto future_pipe_ = [](auto &&f1, auto &&f2) {
 //result is fed into f2 and the whole process repeats
 auto repeat_pipe_ = hana::fix (
   [](auto self, auto f1, auto f2) -> std::shared_future<decltype (f2 (f1 ()))> {
-    //First launch f1, the variable fut will hold the return value once it's ready
+    //First launch f1, the variable 'fut' will hold the return value once it's ready
     auto fut = thread_future_ (f1) ();
     // Two things await this future:
     //A. a function that, when passed a future, will call f2 on it once it's ready

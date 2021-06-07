@@ -129,7 +129,8 @@ auto estream_ = [](auto &&tmp) {
         auto res = fut.wait_for (std::chrono::milliseconds (0));
         if (res == std::future_status::ready)
           {
-            return std::experimental::optional<T> (fut.get ());
+            return std::optional<T> (fut.get ());
+            //return std::experimental::optional<T> (fut.get ());
           }
       }
     else
@@ -137,7 +138,8 @@ auto estream_ = [](auto &&tmp) {
         printf ("invalid\n");
       }
     //printf("empty\n");
-    return std::experimental::optional<T> ();
+    return std::optional<T> ();
+    //return std::experimental::optional<T> ();
   };
 };
 

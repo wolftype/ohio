@@ -19,8 +19,8 @@ link_directories(${PROJECT_BINARY_DIR})
 #add_library(json ext/json/jsoncpp.cpp)
 #set(libraries json)
 
-#CXX FLAGS (C++14 required)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -g -o0")
+#CXX FLAGS (C++17 required)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -g -o0")
 
 #Add Headers as Custom Target for Editing in IDES
 FILE(GLOB_RECURSE HeaderFiles "${PROJECT_SOURCE_DIR}/include/*")

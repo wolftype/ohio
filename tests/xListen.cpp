@@ -92,6 +92,7 @@ int main ()
   //  auto print_time = pipe_ (start_timer_ (), print_with_ ("timer"));
 
   // this will launch and repeat
+  // Note: currently throwing an type-deduction based error
   auto fut = repeat_pipe_ (getchar_, graph);
 
 //  std::cout << string_right_("hello") << move_by_(1,2) << string_right_("XXX") << move_by_(0,-2) << std::flush;

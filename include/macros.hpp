@@ -65,7 +65,7 @@ namespace ohio {
 // Unicode
 #define TREX "\U0001F996"              /* Dinosaur */
 #define CHICK "\U0001F425"             /* Front Facing Baby Chick*/
-#define CHICKEN "\U0001F414"             /* Chicken */
+#define CHICKEN "\U0001F414"           /* Chicken */
 }
 
 

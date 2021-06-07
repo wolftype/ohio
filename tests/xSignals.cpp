@@ -16,7 +16,7 @@ int main ()
   AppStartTime = now ();
   auto tick = wait_ (.05);
 
-  // A bunch of signals, with frequency argument
+  // A bunch of signals that return/range float values with frequency argument/domain
   auto osc = osc_ (2);
   auto ramp = ramp_ (4);
   auto rampdown = rampdown_ (3);
@@ -26,14 +26,16 @@ int main ()
   // all of them together
   auto f = all_ (osc, ramp, rampdown, impulse, saw);
 
-  auto proc = pipe_ (graph_(10), coutall_);
+  // an independent process, that graphs a printout of a result (that's all this does)
+  // (that's a single line of output on the screen)
+  auto proc = pipe_(transform_(pipe_ (graph_(10), coutall_)), endl_);
 
-  auto e = pipe_ (f, transform_ (proc), endl_);
+  // transform the function by the print out process
+  auto e = pipe_ (f, proc);
 
+  // the spell has been cast! now we just keep cranking through time. . .
   while (tick ())
-    {
-      e (time_ ());
-    }
+     e (time_ ());
 
   return 0;
 }

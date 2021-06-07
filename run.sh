@@ -35,6 +35,7 @@ fi
 make VERBOSE=1-- $TARGET
 
 echo "disabling echo and canonical input in shell"
+echo "software might do weird things to your terminal"
 #tput civis
 stty -echo -icanon
 ./bin/$TARGET

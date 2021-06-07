@@ -102,6 +102,7 @@ auto graph_ = [](float mult) {
 
     stream << std::setw (3);
     stream << "\t";
+    stream << WHITE;
 
     return stream.str ();
   };
