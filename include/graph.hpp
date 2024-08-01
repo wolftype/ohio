@@ -1,3 +1,10 @@
+/*
+ excape character codes; *
+
+ *
+ * */
+
+
 #ifndef GRAPHING_HAPPENING
 #define GRAPHING_HAPPENING
 
@@ -44,7 +51,7 @@ auto coutall_ = [](auto &&... xs) {
 };
 
 /// Print anything
-auto print_ = [](auto &&xs) {
+auto print_ = [](auto &&xs) -> bool {
   std::cout << "printing: " << xs << std::endl;
   return true;
 };
@@ -154,11 +161,15 @@ auto clear_ = [](float height) {
 auto move_by_ = [](float x, float y) {
   std::stringstream stream;
 
+  float nx = abs(x);
+  //if (x < 0) nx +=2;
+
   if (y != 0)
     stream << "\033[" << abs (y) << (y > 0 ? "A" : "B");
-
   if (x != 0)
-    stream << "\033[" << abs (x) << (x > 0 ? "C" : "D");
+    stream << "\033[" << nx << (x > 0 ? "C" : "D");
+  else
+    stream << "\033[D";
 
   return stream.str ();
 };

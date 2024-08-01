@@ -28,9 +28,10 @@ int main ()
 
   // an independent process, that graphs a printout of a result (that's all this does)
   // (that's a single line of output on the screen)
+  // e.g. proc will transform the incoming signal into a printout
   auto proc = pipe_(transform_(pipe_ (graph_(10), coutall_)), endl_);
 
-  // transform the function by the print out process
+  // like so -- transform the function by the print out process
   auto e = pipe_ (f, proc);
 
   // the spell has been cast! now we just keep cranking through time. . .

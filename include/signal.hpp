@@ -206,7 +206,7 @@ auto saw_ = [](auto &&x) {
 /// These signal functions return functions of time
 /// constant signal function  @todo should all return optional value?
 auto constant_ = [](auto &&x) {
-  using T = TYPE (x);
+//  using T = TYPE (x);
   return [=](auto &&... xs) {
     return x;  //maybe<T>(x);
   };

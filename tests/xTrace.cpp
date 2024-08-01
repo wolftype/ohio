@@ -70,11 +70,11 @@ int main ()
   // 2. a behavior will launch event e in another thread until the timer event returns,
   // and then e will stop its logic. e must return a maybe type
   behavior b;
-  b.launch (e).until (timer_ (20));
+  b.launch (e).until (timer_ (5));
 
 
   // GREAT. now, that that's happening, let's do more.
-  // this command moves the cursor up to the row above
+  // this command moves the cursor up or down
   auto move = [](int k, int x, int y) {
     return if_then_ (eq_ (k),
                      pipe_ (constant_ (move_by_ (x, y)), cout_, flush_));

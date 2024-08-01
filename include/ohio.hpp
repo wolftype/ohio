@@ -28,5 +28,6 @@
 #include "thread.hpp"
 #include "behavior.hpp"
 #include "macros.hpp"
+#include "graph.hpp"
 
 #endif   /* ----- #ifndef ohio_INC  ----- */

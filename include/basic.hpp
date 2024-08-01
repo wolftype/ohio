@@ -51,7 +51,7 @@ decltype (auto) maybeValue (maybe<T> &&m)
   return maybeValue (T ());
 }
 
-// apply f
+// apply f to incoming signal (e.g. transform x by f)
 auto transform_ = [](auto &&f) {
   return [=](auto &&x) { return hana::transform (x, f); };
 };

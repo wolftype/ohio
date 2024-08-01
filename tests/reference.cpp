@@ -28,14 +28,14 @@
  */
 
 #include <iostream>
-#include <experimental/optional>
+#include <optional>
 
 #include "signal.hpp"
 
 using namespace std;
 using namespace ohio;
 using namespace boost::hana;
-
+using ohio::maybe;
 /*
 /// may or may not contain a value
 template<typename T>

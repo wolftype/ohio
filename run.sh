@@ -39,6 +39,6 @@ echo "software might do weird things to your terminal"
 #tput civis
 stty -echo -icanon
 ./bin/$TARGET
-echo "re-enabling echo and canonical input in shell"
 stty echo icanon
+echo "re-enabled echo and canonical input in shell"
 #tput cnorm

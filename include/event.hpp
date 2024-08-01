@@ -45,7 +45,7 @@ auto stdin_ = [](auto &&... xs) {
 
 auto nothing_ = [](auto &&... xs) { return; };
 
-auto getchar_ = [](auto &&... xs) {
+auto getchar_ = [](auto &&... xs) -> int {
   nothing_ (xs...);
   return getchar ();
 };

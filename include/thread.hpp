@@ -109,7 +109,7 @@ auto future_then_ = [](auto &&f) {
 //  launch this in another thread with thread_args_
 //  see repeat_pipe_ for an example
 auto future_when_ = [](auto &&f, auto &&... xs) {
-  return [=](auto &&fut) mutable -> decltype (f (xs...)) {
+  return [=](auto &&fut) {//-> decltype (f (xs...)) {
     auto x = fut.get ();
     return f (xs...);
   };
@@ -127,7 +127,7 @@ auto future_pipe_ = [](auto &&f1, auto &&f2) {
 
 //detached repeat: f1 is called in another thread.  when it returns,
 //result is fed into f2 and the whole process repeats
-auto repeat_pipe_ = hana::fix (
+auto do_repeat_pipe_ = hana::fix (
   [](auto self, auto f1, auto f2) -> std::shared_future<decltype (f2 (f1 ()))> {
     //First launch f1, the variable 'fut' will hold the return value once it's ready
     auto fut = thread_future_ (f1) ();
